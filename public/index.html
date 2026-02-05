@@ -13,31 +13,35 @@
         body { background-color: #0a0a0c; color: #ffffff; scroll-behavior: smooth; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* --- ESTILOS DO MODO EDIÇÃO --- */
+        /* Modos de Edição */
         .editable-active { outline: 2px dashed #3b82f6; outline-offset: 4px; cursor: text; }
-        .editable-img-active { outline: 2px dashed #facc15; cursor: pointer; opacity: 0.8; }
+        .editable-img-active { outline: 2px dashed #facc15; cursor: pointer; opacity: 0.8; position: relative; }
+        .editable-img-active::after {
+            content: "EDITAR IMAGEM"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 5px 10px; font-size: 10px; border-radius: 4px; pointer-events: none;
+        }
+
+        /* Ferramentas */
+        #textToolbar, #imgModal, #adminPanel { display: none; }
         
-        /* Barra de Ferramentas de Texto (Flutuante) */
         #textToolbar {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: #111; border: 1px solid #333; padding: 10px 20px; border-radius: 50px;
-            display: none; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 10000;
+            align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 10000;
         }
 
-        /* Modal de Upload de Imagem */
         #imgModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 10001; display: none;
+            background: rgba(0,0,0,0.9); z-index: 10001;
             justify-content: center; align-items: center;
         }
 
-        /* Painel Admin Principal */
         #adminPanel {
             position: fixed; top: 20px; left: 20px; z-index: 9999;
             background: #0f172a; border: 1px solid #1e293b; padding: 15px; border-radius: 12px;
-            display: none; box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 280px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 280px; display: none;
         }
-        
+
         .whatsapp-btn {
             position: fixed; bottom: 30px; right: 30px; background-color: #25d366;
             color: white; width: 60px; height: 60px; border-radius: 50px;
@@ -52,70 +56,54 @@
 
     <div id="adminPanel">
         <h3 class="text-white font-bold mb-3 text-sm uppercase tracking-widest text-blue-500">
-            <i class="fas fa-cog"></i> Sistema Electri1000
+            <i class="fas fa-cog"></i> Painel Admin
         </h3>
-        <div id="statusMsg" class="text-xs text-gray-400 mb-4 bg-black p-2 rounded border border-gray-800">Pronto para editar.</div>
+
+        <div class="mb-4 border-b border-gray-700 pb-4">
+            <p class="text-xs text-gray-400 mb-2 font-bold uppercase">Configuração do Logo</p>
+            <div class="flex gap-2">
+                <button onclick="setLogoMode('text')" class="flex-1 text-xs py-2 rounded bg-gray-800 hover:bg-gray-700 border border-gray-600">
+                    <i class="fas fa-font"></i> Usar Texto
+                </button>
+                <button onclick="setLogoMode('image')" class="flex-1 text-xs py-2 rounded bg-gray-800 hover:bg-gray-700 border border-gray-600">
+                    <i class="fas fa-image"></i> Usar Imagem
+                </button>
+            </div>
+        </div>
+
         <button onclick="saveSiteToGitHub()" id="btnSave" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full mb-2 text-sm font-bold transition">
-            <i class="fas fa-save"></i> SALVAR ALTERAÇÕES
+            <i class="fas fa-save"></i> SALVAR TUDO
         </button>
         <button onclick="toggleEditMode(false)" class="bg-red-900/30 text-red-500 border border-red-900/50 px-4 py-2 rounded-lg hover:bg-red-900/50 w-full text-sm transition">
-            Sair do Editor
+            Sair
         </button>
     </div>
 
     <div id="textToolbar">
-        <div class="flex items-center gap-2">
-            <label class="text-gray-400 text-xs uppercase font-bold">Cor:</label>
-            <input type="color" id="colorPicker" class="bg-transparent border-none w-8 h-8 cursor-pointer" onchange="applyTextStyle('color', this.value)">
-        </div>
+        <input type="color" id="colorPicker" class="bg-transparent w-8 h-8 cursor-pointer" onchange="applyTextStyle('color', this.value)">
         <div class="w-px h-6 bg-gray-700"></div>
-        <div class="flex items-center gap-2">
-            <label class="text-gray-400 text-xs uppercase font-bold">Tam:</label>
-            <select id="sizePicker" class="bg-gray-800 text-white text-xs p-1 rounded border border-gray-700" onchange="applyTextStyle('fontSize', this.value)">
-                <option value="1rem">Pequeno</option>
-                <option value="1.25rem">Normal</option>
-                <option value="1.5rem">Médio</option>
-                <option value="2.25rem">Grande</option>
-                <option value="3rem">Título</option>
-                <option value="4.5rem">Gigante</option>
-            </select>
-        </div>
-        <div class="w-px h-6 bg-gray-700"></div>
-        <div class="flex items-center gap-2">
-            <label class="text-gray-400 text-xs uppercase font-bold">Fonte:</label>
-            <select id="fontPicker" class="bg-gray-800 text-white text-xs p-1 rounded border border-gray-700" onchange="applyTextStyle('fontFamily', this.value)">
-                <option value="ui-sans-serif, system-ui">Padrão</option>
-                <option value="'Courier New', monospace">Técnica (Monospace)</option>
-                <option value="'Times New Roman', serif">Clássica</option>
-            </select>
-        </div>
+        <select id="sizePicker" class="bg-gray-800 text-white text-xs p-1 rounded border border-gray-700" onchange="applyTextStyle('fontSize', this.value)">
+            <option value="1rem">Pequeno</option>
+            <option value="1.5rem">Médio</option>
+            <option value="3rem">Título</option>
+            <option value="5rem">Gigante</option>
+        </select>
     </div>
 
     <div id="imgModal">
         <div class="bg-zinc-900 p-8 rounded-2xl w-full max-w-md border border-gray-700">
-            <h3 class="text-xl font-bold mb-6">Alterar Imagem</h3>
+            <h3 class="text-xl font-bold mb-2">Substituir Imagem</h3>
+            <p id="targetFileName" class="text-yellow-500 text-xs font-mono mb-6">Arquivo alvo: ...</p>
             
-            <div class="mb-6">
-                <label class="block text-sm font-bold mb-2 text-blue-400">Opção A: Upload do Computador</label>
-                <input type="file" id="fileInput" accept="image/*" class="block w-full text-sm text-gray-400
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-blue-600 file:text-white
-                  hover:file:bg-blue-700
-                "/>
-                <p class="text-xs text-gray-500 mt-2">Será salvo em: <span class="font-mono text-yellow-500">public/assets/</span></p>
-            </div>
+            <input type="file" id="fileInput" accept="image/*" class="block w-full text-sm text-gray-400 mb-4
+                  file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+                  file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"/>
 
-            <div class="text-center text-gray-600 my-4">- OU -</div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-bold mb-2 text-blue-400">Opção B: Link Externo</label>
-                <input type="text" id="urlInput" placeholder="https://..." class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white text-sm">
-            </div>
+            <div class="text-center text-gray-600 my-2">- OU Link -</div>
+            <input type="text" id="urlInput" placeholder="https://..." class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white text-sm mb-6">
 
             <div class="flex gap-4">
-                <button onclick="processImageChange()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Confirmar</button>
+                <button onclick="processImageChange()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Atualizar</button>
                 <button onclick="closeImgModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">Cancelar</button>
             </div>
         </div>
@@ -123,9 +111,18 @@
 
     <nav class="fixed w-full z-50 glass">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-black tracking-tighter italic edit-text">
-                ELECTRI<span class="text-blue-500">1000</span>
+            
+            <div id="logo-container">
+                <div id="logo-text" class="text-2xl font-black tracking-tighter italic edit-text">
+                    ELECTRI<span class="text-blue-500">1000</span>
+                </div>
+                
+                <img id="logo-img" src="https://via.placeholder.com/150x50?text=LOGO" 
+                     data-filename="logo_oficial.png" 
+                     class="hidden h-12 w-auto object-contain edit-img" 
+                     alt="Logo Imagem">
             </div>
+
             <div class="hidden md:flex space-x-8 items-center text-xs uppercase tracking-widest font-bold">
                 <a href="#sobre" class="hover:text-blue-400 transition edit-text">Sobre</a>
                 <a href="#servicos" class="hover:text-blue-400 transition edit-text">Serviços</a>
@@ -136,11 +133,15 @@
 
     <section class="relative h-screen flex items-center justify-center overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <img id="hero-bg" src="https://images.unsplash.com/photo-1581092334651-ddf26d9a1930?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-30 edit-img" alt="Background">
+            <img id="hero-bg" 
+                 data-filename="hero_background.jpg" 
+                 src="https://images.unsplash.com/photo-1581092334651-ddf26d9a1930?auto=format&fit=crop&q=80&w=1920" 
+                 class="w-full h-full object-cover opacity-30 edit-img" 
+                 alt="Background">
         </div>
         <div class="relative z-10 text-center px-4" data-aos="fade-up">
             <h1 class="text-6xl md:text-8xl font-black mb-4 italic edit-text">PRECISÃO EM <span class="text-blue-500">ENERGIA</span></h1>
-            <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10 edit-text">Diagnóstico imediato e soluções definitivas para sistemas elétricos residenciais e industriais.</p>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10 edit-text">Diagnóstico imediato e soluções definitivas.</p>
             <div class="flex justify-center">
                 <a href="#contato" class="bg-white text-black font-extrabold px-10 py-4 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 edit-text">FALAR COM ESPECIALISTA</a>
             </div>
@@ -150,48 +151,57 @@
     <section id="sobre" class="py-24 bg-zinc-950">
         <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
             <div data-aos="fade-right">
-                <h3 class="text-4xl font-bold mb-6 edit-text">Sabemos exatamente onde está o problema.</h3>
+                <h3 class="text-4xl font-bold mb-6 edit-text">Sabemos onde está o problema.</h3>
                 <p class="text-gray-400 text-lg leading-relaxed mb-6 edit-text">
-                    Na ELECTRI1000, não trabalhamos com suposições. Nossa equipe utiliza equipamentos de ponta para diagnósticos precisos.
+                    Equipamentos de ponta para diagnósticos precisos.
                 </p>
-                <div class="grid grid-cols-2 gap-6 text-sm font-bold uppercase">
-                    <div class="flex items-center gap-3 edit-text"><i class="fas fa-check text-blue-500"></i> Tecnologia de Ponta</div>
-                    <div class="flex items-center gap-3 edit-text"><i class="fas fa-check text-blue-500"></i> Segurança Total</div>
-                </div>
             </div>
             <div class="relative" data-aos="zoom-in">
-                <img src="https://images.unsplash.com/photo-1621905252507-b354bcadcabc?auto=format&fit=crop&q=80&w=800" class="rounded-3xl relative z-10 border border-white/10 edit-img" alt="Tecnico">
+                <img data-filename="sobre_tecnico.jpg" 
+                     src="https://images.unsplash.com/photo-1621905252507-b354bcadcabc?auto=format&fit=crop&q=80&w=800" 
+                     class="rounded-3xl relative z-10 border border-white/10 edit-img" 
+                     alt="Tecnico">
             </div>
         </div>
     </section>
 
     <footer class="py-12 border-t border-white/5 text-center text-gray-600 text-sm">
-        <p id="copyright-trigger" class="cursor-pointer select-none hover:text-blue-500 transition" ondblclick="startAdmin()">
-            &copy; 2026 ELECTRI1000. Todos os direitos reservados. (Duplo clique para Admin)
+        <p class="cursor-pointer select-none hover:text-blue-500" ondblclick="startAdmin()">
+            &copy; 2026 ELECTRI1000. (Duplo clique para Admin)
         </p>
     </footer>
+
+    <a href="https://wa.me/5511999999999" class="whatsapp-btn"><i class="fab fa-whatsapp"></i></a>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         AOS.init();
 
-        // ==========================================
-        // CONFIGURAÇÕES DO GITHUB (EDITAR AQUI)
-        // ==========================================
-        const GITHUB_USERNAME = "caiotleal"; // Ex: joao-eletrica
-        const GITHUB_REPO = "electrimil";    // Ex: site-electri1000
-        const GITHUB_FILE_PATH = "index.html";        // O nome do arquivo no repo
-        // ==========================================
-        // ==========================================
+        // --- CONFIGURAÇÃO (PREENCHA AQUI) ---
+        const GITHUB_USERNAME = "caiotleal"; 
+        const GITHUB_REPO = "electrimil";    
+        const GITHUB_FILE_PATH = "index.html";
+        // ------------------------------------
 
-        let activeElement = null; // Elemento sendo editado
+        let activeElement = null;
         let ghToken = localStorage.getItem('gh_token');
 
-        // --- INICIALIZAÇÃO E CONTROLE ---
         function startAdmin() {
-            const pwd = prompt("Senha Admin:");
-            if (pwd === "admin123") toggleEditMode(true);
-            else alert("Senha incorreta");
+            if(prompt("Senha:") === "admin123") toggleEditMode(true);
+        }
+
+        // --- CONTROLE DE LOGO (TEXTO vs IMAGEM) ---
+        function setLogoMode(mode) {
+            const txt = document.getElementById('logo-text');
+            const img = document.getElementById('logo-img');
+            
+            if (mode === 'text') {
+                txt.classList.remove('hidden');
+                img.classList.add('hidden');
+            } else {
+                txt.classList.add('hidden');
+                img.classList.remove('hidden');
+            }
         }
 
         function toggleEditMode(active) {
@@ -206,187 +216,159 @@
                 document.querySelectorAll('.edit-text').forEach(el => {
                     el.contentEditable = "true";
                     el.classList.add('editable-active');
-                    el.onclick = (e) => {
-                        e.stopPropagation();
-                        openTextToolbar(el);
-                    };
+                    el.onclick = (e) => { e.stopPropagation(); openTextToolbar(el); };
                 });
 
-                // Ativar Imagens
+                // Ativar Imagens (Lê o data-filename)
                 document.querySelectorAll('.edit-img').forEach(el => {
                     el.classList.add('editable-img-active');
-                    el.onclick = (e) => {
-                        e.stopPropagation();
-                        openImgModal(el);
-                    };
+                    el.onclick = (e) => { e.stopPropagation(); openImgModal(el); };
                 });
 
             } else {
                 panel.style.display = 'none';
                 toolbar.style.display = 'none';
                 document.body.classList.remove('border-4', 'border-blue-600');
-                
-                // Limpar Textos
                 document.querySelectorAll('.edit-text').forEach(el => {
-                    el.contentEditable = "false";
-                    el.classList.remove('editable-active');
-                    el.onclick = null;
+                    el.contentEditable = "false"; el.classList.remove('editable-active');
                 });
-                // Limpar Imagens
                 document.querySelectorAll('.edit-img').forEach(el => {
-                    el.classList.remove('editable-img-active');
-                    el.onclick = null;
+                    el.classList.remove('editable-img-active'); el.onclick = null;
                 });
             }
         }
 
-        // --- EDITOR DE TEXTO AVANÇADO ---
+        // --- EDITORES ---
         function openTextToolbar(el) {
             activeElement = el;
-            const toolbar = document.getElementById('textToolbar');
-            toolbar.style.display = 'flex';
-            
-            // Sincronizar valores atuais
-            const style = window.getComputedStyle(el);
-            // (Opcional) Poderia setar os inputs aqui com os valores atuais
+            document.getElementById('textToolbar').style.display = 'flex';
+        }
+        function applyTextStyle(prop, val) {
+            if(activeElement) activeElement.style[prop] = val;
         }
 
-        function applyTextStyle(property, value) {
-            if (activeElement) {
-                activeElement.style[property] = value;
-            }
-        }
-
-        // --- EDITOR DE IMAGENS E UPLOAD ---
         function openImgModal(el) {
             activeElement = el;
+            const filename = el.getAttribute('data-filename') || 'sem_nome_definido.png';
+            document.getElementById('targetFileName').innerText = "Será salvo como: assets/" + filename;
             document.getElementById('imgModal').style.display = 'flex';
         }
-
         function closeImgModal() {
             document.getElementById('imgModal').style.display = 'none';
-            document.getElementById('fileInput').value = "";
-            document.getElementById('urlInput').value = "";
         }
 
+        // --- LÓGICA DE UPLOAD COM SUBSTITUIÇÃO ---
         async function processImageChange() {
             const fileInput = document.getElementById('fileInput');
             const urlInput = document.getElementById('urlInput');
             const btn = document.querySelector('#imgModal button');
 
-            // 1. Se for URL direto
             if (urlInput.value) {
                 activeElement.src = urlInput.value;
-                closeImgModal();
-                return;
+                closeImgModal(); return;
             }
 
-            // 2. Se for Upload de Arquivo
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                btn.textContent = "Enviando para o GitHub...";
+                // PEGA O NOME FIXO DEFINIDO NO HTML
+                const fixedName = activeElement.getAttribute('data-filename');
+                
+                if (!fixedName) {
+                    alert("Erro: Esta imagem não tem um nome fixo definido no código (data-filename).");
+                    return;
+                }
+
+                btn.textContent = "Verificando e Substituindo...";
                 btn.disabled = true;
 
                 try {
-                    // Converter para Base64
                     const base64 = await toBase64(file);
                     const cleanBase64 = base64.split(',')[1];
-                    const fileName = Date.now() + "_" + file.name; // Nome único
-                    const path = `public/assets/${fileName}`;
+                    const path = `assets/${fixedName}`; // Pasta Assets
 
-                    // Enviar para GitHub
-                    const uploadedUrl = await uploadFileToGitHub(path, cleanBase64);
+                    // 1. TENTA OBTER O SHA DO ARQUIVO EXISTENTE (PARA SUBSTITUIR)
+                    const existingSha = await getFileSha(path);
                     
-                    if (uploadedUrl) {
-                        activeElement.src = uploadedUrl;
-                        alert("Imagem carregada com sucesso!");
-                        closeImgModal();
-                    }
+                    // 2. FAZ O UPLOAD (CRIA OU ATUALIZA)
+                    const uploadedUrl = await uploadFileToGitHub(path, cleanBase64, existingSha);
+                    
+                    // 3. ATUALIZA O SRC COM TIMESTAMP PARA EVITAR CACHE DO NAVEGADOR
+                    activeElement.src = uploadedUrl + "?t=" + new Date().getTime();
+                    alert("Imagem substituída com sucesso!");
+                    closeImgModal();
+
                 } catch (e) {
-                    alert("Erro no upload: " + e.message);
+                    alert("Erro: " + e.message);
                 } finally {
-                    btn.textContent = "Confirmar";
+                    btn.textContent = "Atualizar";
                     btn.disabled = false;
                 }
             }
         }
 
-        // --- API GITHUB (UPLOAD DE ARQUIVO E SITE) ---
-        
+        // --- GITHUB API HELPERS ---
         async function getToken() {
             if (!ghToken) {
-                ghToken = prompt("Token do GitHub (ghp_...):");
-                if (ghToken) localStorage.setItem('gh_token', ghToken);
+                ghToken = prompt("Token GitHub:");
+                if(ghToken) localStorage.setItem('gh_token', ghToken);
             }
             return ghToken;
         }
 
-        // Função Auxiliar: File -> Base64
         const toBase64 = file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
+            const r = new FileReader(); r.readAsDataURL(file);
+            r.onload = () => resolve(r.result); r.onerror = reject;
         });
 
-        // 1. Upload de Arquivo Único (Imagem)
-        async function uploadFileToGitHub(path, contentBase64) {
+        // Verifica se arquivo existe e retorna o SHA
+        async function getFileSha(path) {
             const token = await getToken();
-            if (!token) return null;
-
             const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`;
-            
-            const response = await fetch(url, {
-                method: "PUT",
-                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    message: "Upload de imagem via CMS",
-                    content: contentBase64
-                })
-            });
-
-            if (!response.ok) throw new Error("Falha no upload GitHub");
-            const data = await response.json();
-            return data.content.download_url; // Retorna URL direta da imagem
+            const res = await fetch(url, { headers: { "Authorization": `token ${token}` }});
+            if (res.ok) {
+                const data = await res.json();
+                return data.sha; // Retorna o ID do arquivo para permitir sobrescrever
+            }
+            return null; // Arquivo não existe ainda
         }
 
-        // 2. Salvar Site Completo (HTML Atualizado)
+        async function uploadFileToGitHub(path, content, sha) {
+            const token = await getToken();
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`;
+            
+            const body = {
+                message: "Update Image (CMS)",
+                content: content
+            };
+            if (sha) body.sha = sha; // IMPORTANTE: Isso autoriza a substituição
+
+            const res = await fetch(url, {
+                method: "PUT",
+                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) throw new Error("Falha ao enviar.");
+            const data = await res.json();
+            return data.content.download_url;
+        }
+
         async function saveSiteToGitHub() {
             const btn = document.getElementById('btnSave');
-            btn.innerHTML = "Salvando...";
-            
-            // Limpar UI antes de salvar
-            toggleEditMode(false);
+            btn.innerHTML = "Salvando..."; toggleEditMode(false);
             
             try {
                 const token = await getToken();
-                const htmlContent = document.documentElement.outerHTML;
-                const contentBase64 = btoa(unescape(encodeURIComponent(htmlContent)));
+                const html = document.documentElement.outerHTML;
+                const content = btoa(unescape(encodeURIComponent(html)));
+                const sha = await getFileSha(GITHUB_FILE_PATH); // Pega SHA do index.html
 
-                // Pegar SHA atual
-                const getUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
-                const getRes = await fetch(getUrl, { headers: { "Authorization": `token ${token}` }});
-                const getData = await getRes.json();
-                
-                // Enviar Update
-                const putRes = await fetch(getUrl, {
-                    method: "PUT",
-                    headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        message: "Site atualizado via CMS ⚡",
-                        content: contentBase64,
-                        sha: getData.sha
-                    })
-                });
-
-                if (putRes.ok) alert("SITE SALVO COM SUCESSO! 🚀");
-                else throw new Error("Erro ao salvar HTML");
-
+                await uploadFileToGitHub(GITHUB_FILE_PATH, content, sha);
+                alert("Site Salvo!");
             } catch (e) {
-                alert("Erro: " + e.message);
-                toggleEditMode(true); // Voltar se der erro
+                alert("Erro: " + e.message); toggleEditMode(true);
             } finally {
-                btn.innerHTML = '<i class="fas fa-save"></i> SALVAR ALTERAÇÕES';
+                btn.innerHTML = "SALVAR TUDO";
             }
         }
     </script>
