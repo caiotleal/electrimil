@@ -1,89 +1,184 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
-
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.8.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.8.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.8.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
-
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
-
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELECTRI1000 | Especialistas em Manutenção Elétrica</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXX"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXX');
     </script>
-  </body>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        body { background-color: #0a0a0c; color: #ffffff; scroll-behavior: smooth; }
+        .neon-text { text-shadow: 0 0 10px rgba(59, 130, 246, 0.8); }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .gradient-border:hover { border-color: #facc15; box-shadow: 0 0 20px rgba(250, 204, 21, 0.3); }
+        
+        /* Botão WhatsApp Flutuante */
+        .whatsapp-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #25d366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 20px rgba(0,0,0,0.5);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        .whatsapp-btn:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body class="font-sans antialiased overflow-x-hidden">
+
+    <a href="https://wa.me/5511999999999?text=Olá! Gostaria de um orçamento técnico da ELECTRI1000." target="_blank" class="whatsapp-btn">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <nav class="fixed w-full z-50 glass">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-black tracking-tighter italic">
+                ELECTRI<span class="text-blue-500">1000</span>
+            </div>
+            <div class="hidden md:flex space-x-8 items-center text-xs uppercase tracking-widest font-bold">
+                <a href="#sobre" class="hover:text-blue-400 transition">Sobre</a>
+                <a href="#servicos" class="hover:text-blue-400 transition">Serviços</a>
+                <a href="#contato" class="bg-blue-600 px-6 py-2 rounded-full hover:bg-blue-700 transition">Solicitar Visita</a>
+            </div>
+            <div class="flex space-x-4 text-lg">
+                <a href="#" class="hover:text-pink-500 transition"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-blue-600 transition"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="relative h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1581092334651-ddf26d9a1930?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-30" alt="Industrial Background">
+        </div>
+        <div class="relative z-10 text-center px-4" data-aos="fade-up" data-aos-duration="1000">
+            <h1 class="text-6xl md:text-8xl font-black mb-4 italic">PRECISÃO EM <span class="text-blue-500">ENERGIA</span></h1>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10">Diagnóstico imediato e soluções definitivas para sistemas elétricos residenciais e industriais de alta complexidade.</p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="#contato" class="bg-white text-black font-extrabold px-10 py-4 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300">FALAR COM ESPECIALISTA</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="sobre" class="py-24 bg-zinc-950">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+            <div data-aos="fade-right">
+                <h2 class="text-blue-500 font-bold tracking-widest mb-2 uppercase text-sm">Nossa Experiência</h2>
+                <h3 class="text-4xl font-bold mb-6">Sabemos exatamente onde está o problema.</h3>
+                <p class="text-gray-400 text-lg leading-relaxed mb-6">
+                    Na <strong>ELECTRI1000</strong>, não trabalhamos com suposições. Nossa equipe utiliza equipamentos de termografia e análise de rede de última geração para identificar falhas ocultas antes que elas se tornem prejuízos.
+                </p>
+                <div class="grid grid-cols-2 gap-6 text-sm font-bold uppercase">
+                    <div class="flex items-center gap-3"><i class="fas fa-microchip text-blue-500"></i> Tecnologia de Ponta</div>
+                    <div class="flex items-center gap-3"><i class="fas fa-shield-alt text-blue-500"></i> Segurança Total</div>
+                </div>
+            </div>
+            <div class="relative" data-aos="zoom-in">
+                <div class="absolute -inset-4 bg-blue-500/20 blur-3xl rounded-full"></div>
+                <img src="https://images.unsplash.com/photo-1621905252507-b354bcadcabc?auto=format&fit=crop&q=80&w=800" class="rounded-3xl relative z-10 border border-white/10" alt="Eletricista Profissional">
+            </div>
+        </div>
+    </section>
+
+    <section class="py-12 border-y border-white/5 bg-black">
+        <div class="max-w-7xl mx-auto px-6 overflow-hidden">
+            <p class="text-center text-gray-600 text-xs font-bold uppercase tracking-[0.3em] mb-8">Empresas Atendidas & Parceiros</p>
+            <div class="flex flex-wrap justify-center gap-12 text-4xl text-gray-700 opacity-50">
+                <i class="fab fa-google"></i>
+                <i class="fab fa-amazon"></i>
+                <i class="fab fa-microsoft"></i>
+                <i class="fab fa-apple"></i>
+                <i class="fab fa-facebook"></i>
+            </div>
+        </div>
+    </section>
+
+    <section id="contato" class="py-24 bg-black">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-16">
+                <div data-aos="fade-up">
+                    <h2 class="text-5xl font-bold mb-8 italic">VAMOS RESOLVER <span class="text-blue-500">SEU PROJETO?</span></h2>
+                    <p class="text-gray-400 mb-10 text-lg">Preencha o formulário para um atendimento técnico especializado. Respondemos em até 30 minutos em horário comercial.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-500">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase">Ligue para nós</p>
+                                <p class="font-bold">(11) 99999-9999</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-500">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase">Siga no Instagram</p>
+                                <p class="font-bold">@electri1000_oficial</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-10 rounded-3xl" data-aos="fade-left">
+                    <form id="contactForm" class="space-y-4">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <input type="text" placeholder="Nome Completo" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:border-blue-500 outline-none transition" required>
+                            <input type="email" placeholder="E-mail" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:border-blue-500 outline-none transition" required>
+                        </div>
+                        <select class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:border-blue-500 outline-none transition text-gray-400">
+                            <option value="residencial">Manutenção Residencial</option>
+                            <option value="industrial">Manutenção Industrial</option>
+                            <option value="projeto">Novo Projeto / Instalação</option>
+                        </select>
+                        <textarea placeholder="Descreva brevemente sua necessidade..." rows="4" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:border-blue-500 outline-none transition" required></textarea>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-xl font-black uppercase tracking-widest transition-all">ENVIAR DIAGNÓSTICO</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-12 border-t border-white/5 text-center text-gray-600 text-sm">
+        <p>&copy; 2026 ELECTRI1000. Todos os direitos reservados. Especialistas em Soluções Elétricas.</p>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Inicializa animações de scroll
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // Simulação de envio do formulário
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Mensagem enviada com sucesso! Nossa equipe técnica entrará em contato em breve.');
+            this.reset();
+        });
+    </script>
+</body>
 </html>
