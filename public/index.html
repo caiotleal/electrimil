@@ -17,14 +17,11 @@
         body { background-color: #0a0a0c; color: #ffffff; scroll-behavior: smooth; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Estilos do CMS */
+        /* Classes visuais de edição */
         .editable-active { outline: 2px dashed #3b82f6; outline-offset: 4px; cursor: text; }
         .editable-img-active { outline: 2px dashed #facc15; cursor: pointer; opacity: 0.8; position: relative; }
-        .editable-img-active::after {
-            content: "CLIQUE P/ TROCAR"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8); color: white; padding: 5px 10px; font-size: 10px; border-radius: 4px; pointer-events: none;
-        }
-
+        
+        /* Elementos do Admin (Começam ocultos) */
         #textToolbar, #imgModal, #adminPanel { display: none; }
         
         #textToolbar {
@@ -59,30 +56,30 @@
 
     <div id="adminPanel">
         <h3 class="text-white font-bold mb-3 text-sm uppercase tracking-widest text-blue-500">
-            <i class="fas fa-cog"></i> Painel Admin
+            <i class="fas fa-cog"></i> Sistema Electri1000
         </h3>
 
         <div class="mb-4 border-b border-gray-700 pb-4">
-            <p class="text-xs text-gray-400 mb-2 font-bold uppercase">Tipo de Logo</p>
+            <p class="text-xs text-gray-400 mb-2 font-bold uppercase">Modo do Logo</p>
             <div class="flex gap-2">
                 <button onclick="setLogoMode('text')" class="flex-1 text-xs py-2 rounded bg-gray-800 hover:bg-gray-700 border border-gray-600">Texto</button>
                 <button onclick="setLogoMode('image')" class="flex-1 text-xs py-2 rounded bg-gray-800 hover:bg-gray-700 border border-gray-600">Imagem</button>
             </div>
         </div>
 
-        <button onclick="saveSiteToGitHub()" id="btnSave" class="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 w-full mb-2 text-sm font-bold transition flex justify-center items-center gap-2">
-            <i class="fas fa-cloud-upload-alt"></i> SALVAR NO GITHUB
+        <button onclick="prepareAndSave()" id="btnSave" class="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 w-full mb-2 text-sm font-bold transition flex justify-center items-center gap-2">
+            <i class="fas fa-cloud-upload-alt"></i> ATUALIZAR SITE
         </button>
 
         <button onclick="downloadManual()" class="bg-blue-600/20 text-blue-400 border border-blue-500/50 px-4 py-2 rounded-lg hover:bg-blue-600/30 w-full mb-2 text-xs transition">
-            <i class="fas fa-download"></i> Baixar HTML
+            <i class="fas fa-download"></i> Backup Manual
         </button>
 
         <button onclick="toggleEditMode(false)" class="bg-red-900/30 text-red-500 border border-red-900/50 px-4 py-2 rounded-lg hover:bg-red-900/50 w-full text-xs transition">
             Sair
         </button>
-
-        <div id="errorLog" class="hidden mt-4 p-2 bg-red-900/50 border border-red-500 text-red-200 text-xs rounded break-all"></div>
+        
+        <div id="statusLog" class="mt-2 text-xs text-center text-gray-400"></div>
     </div>
 
     <div id="textToolbar">
@@ -99,18 +96,12 @@
 
     <div id="imgModal">
         <div class="bg-zinc-900 p-8 rounded-2xl w-full max-w-md border border-gray-700">
-            <h3 class="text-xl font-bold mb-2">Alterar Imagem</h3>
+            <h3 class="text-xl font-bold mb-2">Trocar Imagem</h3>
             <p id="targetFileName" class="text-yellow-500 text-xs font-mono mb-6">...</p>
-            
-            <input type="file" id="fileInput" accept="image/*" class="block w-full text-sm text-gray-400 mb-4
-                  file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
-                  file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"/>
-
-            <div class="text-center text-gray-600 my-2">- OU Link -</div>
-            <input type="text" id="urlInput" placeholder="https://..." class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white text-sm mb-6">
-
+            <input type="file" id="fileInput" accept="image/*" class="block w-full text-sm text-gray-400 mb-4 file:bg-blue-600 file:text-white file:rounded-full file:px-4 file:py-2 file:border-0"/>
+            <input type="text" id="urlInput" placeholder="Ou cole um link..." class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white text-sm mb-6">
             <div class="flex gap-4">
-                <button onclick="processImageChange()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Salvar</button>
+                <button onclick="uploadImageToAssets()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Confirmar</button>
                 <button onclick="closeImgModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">Cancelar</button>
             </div>
         </div>
@@ -184,6 +175,7 @@
     <script>
         AOS.init();
 
+        // --- CONFIGURAÇÃO ---
         const GITHUB_USERNAME = "caiotleal"; 
         const GITHUB_REPO = "electrimil";    
         const GITHUB_FILE_PATH = "index.html";
@@ -191,15 +183,9 @@
         let activeElement = null;
         let ghToken = localStorage.getItem('gh_token');
 
+        // --- FUNÇÕES DE ADMINISTRAÇÃO ---
         function startAdmin() {
-            if(prompt("Senha Admin:") === "admin123") toggleEditMode(true);
-        }
-
-        function setLogoMode(mode) {
-            const txt = document.getElementById('logo-text');
-            const img = document.getElementById('logo-img');
-            if (mode === 'text') { txt.classList.remove('hidden'); img.classList.add('hidden'); }
-            else { txt.classList.add('hidden'); img.classList.remove('hidden'); }
+            if(prompt("Senha:") === "admin123") toggleEditMode(true);
         }
 
         function toggleEditMode(active) {
@@ -207,169 +193,209 @@
             const toolbar = document.getElementById('textToolbar');
             
             if (active) {
+                // MODO EDIÇÃO ATIVADO
                 panel.style.display = 'block';
                 document.body.classList.add('border-4', 'border-blue-600');
                 
+                // Habilita edição de textos
                 document.querySelectorAll('.edit-text').forEach(el => {
                     el.contentEditable = "true";
                     el.classList.add('editable-active');
                     el.onclick = (e) => { e.stopPropagation(); openTextToolbar(el); };
                 });
 
+                // Habilita edição de imagens
                 document.querySelectorAll('.edit-img').forEach(el => {
                     el.classList.add('editable-img-active');
                     el.onclick = (e) => { e.stopPropagation(); openImgModal(el); };
                 });
-
             } else {
+                // MODO EDIÇÃO DESATIVADO (LIMPEZA)
                 panel.style.display = 'none';
                 toolbar.style.display = 'none';
                 document.body.classList.remove('border-4', 'border-blue-600');
+                
                 document.querySelectorAll('.edit-text').forEach(el => {
-                    el.contentEditable = "false"; el.classList.remove('editable-active');
+                    el.contentEditable = "false";
+                    el.classList.remove('editable-active');
+                    el.onclick = null;
                 });
+
                 document.querySelectorAll('.edit-img').forEach(el => {
-                    el.classList.remove('editable-img-active'); el.onclick = null;
+                    el.classList.remove('editable-img-active');
+                    el.onclick = null;
                 });
             }
         }
 
-        function openTextToolbar(el) { activeElement = el; document.getElementById('textToolbar').style.display = 'flex'; }
-        function applyTextStyle(prop, val) { if(activeElement) activeElement.style[prop] = val; }
+        // --- LÓGICA DE CLONE E SALVAMENTO (SNAPSHOT) ---
 
-        function openImgModal(el) {
-            activeElement = el;
-            const filename = el.getAttribute('data-filename') || 'sem_nome.png';
-            document.getElementById('targetFileName').innerText = "Substituir: assets/" + filename;
-            document.getElementById('imgModal').style.display = 'flex';
-        }
-        function closeImgModal() { document.getElementById('imgModal').style.display = 'none'; }
-
-        function downloadManual() {
-            toggleEditMode(false);
-            const html = document.documentElement.outerHTML;
-            const blob = new Blob([html], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'index.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            toggleEditMode(true);
-            alert("Arquivo baixado!");
-        }
-
-        async function getToken() {
-            if (!ghToken) {
-                ghToken = prompt("Cole seu Token do GitHub (ghp_...):");
-                if(ghToken) localStorage.setItem('gh_token', ghToken);
-            }
-            return ghToken;
-        }
-
-        const toBase64 = file => new Promise((res, rej) => {
-            const r = new FileReader(); r.readAsDataURL(file);
-            r.onload = () => res(r.result); r.onerror = rej;
-        });
-
-        async function getFileSha(path) {
+        async function prepareAndSave() {
+            const btn = document.getElementById('btnSave');
+            const status = document.getElementById('statusLog');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando Snapshot...';
+            
             try {
-                const token = await getToken();
-                const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}?t=${Date.now()}`;
-                const res = await fetch(url, { headers: { "Authorization": `token ${token}` }});
-                if (res.status === 404) return null;
-                if (!res.ok) throw new Error(`Erro buscando SHA: ${res.status}`);
-                const data = await res.json();
-                return data.sha;
-            } catch (e) { throw e; }
-        }
+                // 1. LIMPEZA VISUAL (O CLONE LOCAL)
+                // Desativamos o modo edição para que o HTML gerado esteja limpo
+                toggleEditMode(false);
+                
+                // Pequeno delay para garantir que o DOM atualizou
+                await new Promise(r => setTimeout(r, 500));
 
-        async function uploadFileToGitHub(path, content, sha) {
-            const token = await getToken();
-            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`;
-            const body = { message: "Update CMS", content: content };
-            if (sha) body.sha = sha;
+                status.innerText = "Capturando código limpo...";
+                
+                // 2. CAPTURA O CÓDIGO ATUAL (SNAPSHOT)
+                const htmlContent = document.documentElement.outerHTML;
+                
+                // Validação de segurança
+                if(htmlContent.length < 1000) {
+                    throw new Error("Erro: O HTML gerado parece vazio. Abortando para segurança.");
+                }
 
-            const res = await fetch(url, {
-                method: "PUT",
-                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(`Erro GitHub: ${res.status} - ${errData.message}`);
+                status.innerText = "Enviando para o GitHub...";
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Enviando...';
+
+                // 3. ENVIA PARA O GITHUB
+                const sha = await getFileSha(GITHUB_FILE_PATH);
+                const contentBase64 = btoa(unescape(encodeURIComponent(htmlContent)));
+                
+                await uploadFileToGitHub(GITHUB_FILE_PATH, contentBase64, sha);
+                
+                alert("SUCESSO! \nO HTML atual foi clonado e enviado para o GitHub. \nO site atualizará em breve.");
+
+            } catch (error) {
+                alert("ERRO AO SALVAR: " + error.message);
+                console.error(error);
+                // Se der erro, reativa o modo edição para não perder o trabalho
+                toggleEditMode(true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> ATUALIZAR SITE';
+                status.innerText = "";
             }
-            return await res.json();
         }
 
-        async function processImageChange() {
+        // --- UPLOAD DE IMAGENS (ASSETS) ---
+
+        async function uploadImageToAssets() {
             const fileInput = document.getElementById('fileInput');
             const urlInput = document.getElementById('urlInput');
             const btn = document.querySelector('#imgModal button');
 
-            if (urlInput.value) { 
-                activeElement.setAttribute('src', urlInput.value); 
-                closeImgModal(); return; 
+            // Caso seja Link Externo
+            if (urlInput.value) {
+                activeElement.src = urlInput.value;
+                // Força a gravação no HTML
+                activeElement.setAttribute('src', urlInput.value);
+                closeImgModal();
+                return;
             }
 
+            // Caso seja Upload de Arquivo
             if (fileInput.files.length > 0) {
                 const fixedName = activeElement.getAttribute('data-filename');
-                if (!fixedName) return alert("Erro: Imagem sem data-filename.");
+                if(!fixedName) return alert("Erro: Imagem sem data-filename definido.");
 
-                btn.textContent = "Enviando..."; btn.disabled = true;
+                btn.textContent = "Enviando para Assets...";
+                btn.disabled = true;
 
                 try {
-                    const base64 = await toBase64(fileInput.files[0]);
+                    const file = fileInput.files[0];
+                    const base64 = await toBase64(file);
                     const cleanBase64 = base64.split(',')[1];
                     const path = `assets/${fixedName}`;
                     
+                    // Envia imagem para pasta assets
                     const sha = await getFileSha(path);
                     await uploadFileToGitHub(path, cleanBase64, sha);
-                    
-                    // --- CORREÇÃO PRINCIPAL: setAttribute ---
+
+                    // GERA O LINK FINAL
                     const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${path}`;
-                    const newSrc = rawUrl + "?v=" + Date.now();
+                    // Adiciona Timestamp para o navegador ver a mudança AGORA
+                    const finalSrc = rawUrl + "?v=" + Date.now();
+
+                    // ATUALIZA O DOM LOCAL (O CLONE)
+                    activeElement.src = finalSrc;
+                    activeElement.setAttribute('src', finalSrc);
                     
-                    // Isso escreve o novo link DIRETAMENTE NO CÓDIGO HTML
-                    activeElement.setAttribute('src', newSrc);
-                    activeElement.src = newSrc; // Atualiza visualmente também
-                    
-                    alert("Imagem atualizada! Clique em 'SALVAR NO GITHUB' para gravar a mudança.");
+                    alert("Imagem enviada para pasta Assets! \nAgora clique em 'ATUALIZAR SITE' para salvar essa mudança no HTML.");
                     closeImgModal();
+
                 } catch (e) {
-                    showError(e.message);
+                    alert("Erro Assets: " + e.message);
                 } finally {
-                    btn.textContent = "Salvar"; btn.disabled = false;
+                    btn.textContent = "Confirmar";
+                    btn.disabled = false;
                 }
             }
         }
 
-        async function saveSiteToGitHub() {
-            const btn = document.getElementById('btnSave');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SALVANDO...';
-            toggleEditMode(false);
-            
-            try {
-                // Captura o HTML com as alterações feitas pelo setAttribute
-                const html = document.documentElement.outerHTML;
-                const content = btoa(unescape(encodeURIComponent(html)));
-                const sha = await getFileSha(GITHUB_FILE_PATH);
-                
-                await uploadFileToGitHub(GITHUB_FILE_PATH, content, sha);
-                alert("SUCESSO! Site atualizado. \nAguarde 2 minutos para ver no ar.");
-            } catch (e) {
-                toggleEditMode(true);
-                showError("FALHA AO SALVAR:\n" + e.message);
-            } finally {
-                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> SALVAR NO GITHUB';
-            }
+        // --- UTILITÁRIOS E API ---
+
+        function openTextToolbar(el) { activeElement = el; document.getElementById('textToolbar').style.display = 'flex'; }
+        function applyTextStyle(prop, val) { if(activeElement) activeElement.style[prop] = val; }
+        
+        function openImgModal(el) {
+            activeElement = el;
+            document.getElementById('targetFileName').innerText = "Destino: assets/" + (el.getAttribute('data-filename') || '??');
+            document.getElementById('imgModal').style.display = 'flex';
+        }
+        function closeImgModal() { document.getElementById('imgModal').style.display = 'none'; }
+        
+        function setLogoMode(mode) {
+            const txt = document.getElementById('logo-text');
+            const img = document.getElementById('logo-img');
+            if (mode === 'text') { txt.classList.remove('hidden'); img.classList.add('hidden'); }
+            else { txt.classList.add('hidden'); img.classList.remove('hidden'); }
         }
 
-        function showError(msg) {
-            const el = document.getElementById('errorLog');
-            el.innerText = msg; el.classList.remove('hidden'); alert(msg);
+        function downloadManual() {
+            toggleEditMode(false);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([document.documentElement.outerHTML], {type: 'text/html'}));
+            a.download = 'index.html';
+            a.click();
+            toggleEditMode(true);
         }
+
+        // API GITHUB
+        async function getToken() {
+            if(!ghToken) { ghToken = prompt("Token GitHub:"); localStorage.setItem('gh_token', ghToken); }
+            return ghToken;
+        }
+
+        async function getFileSha(path) {
+            try {
+                const token = await getToken();
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}?t=${Date.now()}`, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+                if(res.status === 404) return null;
+                const data = await res.json();
+                return data.sha;
+            } catch(e) { return null; }
+        }
+
+        async function uploadFileToGitHub(path, content, sha) {
+            const token = await getToken();
+            const body = { message: "Site Update (Snapshot)", content: content };
+            if(sha) body.sha = sha;
+            
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`, {
+                method: "PUT",
+                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+            if(!res.ok) throw new Error("Falha no upload GitHub");
+        }
+        
+        const toBase64 = file => new Promise((res, rej) => {
+            const r = new FileReader(); r.readAsDataURL(file);
+            r.onload = () => res(r.result); r.onerror = rej;
+        });
     </script>
 </body>
 </html>
