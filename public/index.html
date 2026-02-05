@@ -17,11 +17,10 @@
         .editable-active { outline: 2px dashed #3b82f6; outline-offset: 4px; cursor: text; }
         .editable-img-active { outline: 2px dashed #facc15; cursor: pointer; opacity: 0.8; position: relative; }
         .editable-img-active::after {
-            content: "EDITAR IMAGEM"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            content: "EDITAR"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.8); color: white; padding: 5px 10px; font-size: 10px; border-radius: 4px; pointer-events: none;
         }
 
-        /* Ferramentas */
         #textToolbar, #imgModal, #adminPanel { display: none; }
         
         #textToolbar {
@@ -39,7 +38,7 @@
         #adminPanel {
             position: fixed; top: 20px; left: 20px; z-index: 9999;
             background: #0f172a; border: 1px solid #1e293b; padding: 15px; border-radius: 12px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 280px; display: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 300px; display: none;
         }
 
         .whatsapp-btn {
@@ -60,23 +59,26 @@
         </h3>
 
         <div class="mb-4 border-b border-gray-700 pb-4">
-            <p class="text-xs text-gray-400 mb-2 font-bold uppercase">Configuração do Logo</p>
+            <p class="text-xs text-gray-400 mb-2 font-bold uppercase">Tipo de Logo</p>
             <div class="flex gap-2">
-                <button onclick="setLogoMode('text')" class="flex-1 text-xs py-2 rounded bg-gray-800 hover:bg-gray-700 border border-gray-600">
-                    <i class="fas fa-font"></i> Usar Texto
-                </button>
-                <button onclick="setLogoMode('image')" class="flex-1 text-xs py-2 rounded bg-gray-800 hover:bg-gray-700 border border-gray-600">
-                    <i class="fas fa-image"></i> Usar Imagem
-                </button>
+                <button onclick="setLogoMode('text')" class="flex-1 text-xs py-2 rounded bg-gray-800 hover:bg-gray-700 border border-gray-600">Texto</button>
+                <button onclick="setLogoMode('image')" class="flex-1 text-xs py-2 rounded bg-gray-800 hover:bg-gray-700 border border-gray-600">Imagem</button>
             </div>
         </div>
 
-        <button onclick="saveSiteToGitHub()" id="btnSave" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full mb-2 text-sm font-bold transition">
-            <i class="fas fa-save"></i> SALVAR TUDO
+        <button onclick="saveSiteToGitHub()" id="btnSave" class="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 w-full mb-2 text-sm font-bold transition flex justify-center items-center gap-2">
+            <i class="fas fa-cloud-upload-alt"></i> SALVAR NO GITHUB
         </button>
-        <button onclick="toggleEditMode(false)" class="bg-red-900/30 text-red-500 border border-red-900/50 px-4 py-2 rounded-lg hover:bg-red-900/50 w-full text-sm transition">
+
+        <button onclick="downloadManual()" class="bg-blue-600/20 text-blue-400 border border-blue-500/50 px-4 py-2 rounded-lg hover:bg-blue-600/30 w-full mb-2 text-xs transition">
+            <i class="fas fa-download"></i> Baixar HTML (Manual)
+        </button>
+
+        <button onclick="toggleEditMode(false)" class="bg-red-900/30 text-red-500 border border-red-900/50 px-4 py-2 rounded-lg hover:bg-red-900/50 w-full text-xs transition">
             Sair
         </button>
+
+        <div id="errorLog" class="hidden mt-4 p-2 bg-red-900/50 border border-red-500 text-red-200 text-xs rounded break-all"></div>
     </div>
 
     <div id="textToolbar">
@@ -84,16 +86,17 @@
         <div class="w-px h-6 bg-gray-700"></div>
         <select id="sizePicker" class="bg-gray-800 text-white text-xs p-1 rounded border border-gray-700" onchange="applyTextStyle('fontSize', this.value)">
             <option value="1rem">Pequeno</option>
-            <option value="1.5rem">Médio</option>
-            <option value="3rem">Título</option>
-            <option value="5rem">Gigante</option>
+            <option value="1.5rem">Normal</option>
+            <option value="2.5rem">Grande</option>
+            <option value="4rem">Título</option>
+            <option value="6rem">Gigante</option>
         </select>
     </div>
 
     <div id="imgModal">
         <div class="bg-zinc-900 p-8 rounded-2xl w-full max-w-md border border-gray-700">
-            <h3 class="text-xl font-bold mb-2">Substituir Imagem</h3>
-            <p id="targetFileName" class="text-yellow-500 text-xs font-mono mb-6">Arquivo alvo: ...</p>
+            <h3 class="text-xl font-bold mb-2">Alterar Imagem</h3>
+            <p id="targetFileName" class="text-yellow-500 text-xs font-mono mb-6">...</p>
             
             <input type="file" id="fileInput" accept="image/*" class="block w-full text-sm text-gray-400 mb-4
                   file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
@@ -103,7 +106,7 @@
             <input type="text" id="urlInput" placeholder="https://..." class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white text-sm mb-6">
 
             <div class="flex gap-4">
-                <button onclick="processImageChange()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Atualizar</button>
+                <button onclick="processImageChange()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Salvar</button>
                 <button onclick="closeImgModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">Cancelar</button>
             </div>
         </div>
@@ -116,11 +119,11 @@
                 <div id="logo-text" class="text-2xl font-black tracking-tighter italic edit-text">
                     ELECTRI<span class="text-blue-500">1000</span>
                 </div>
-                
-                <img id="logo-img" src="https://via.placeholder.com/150x50?text=LOGO" 
+                <img id="logo-img" src="https://raw.githubusercontent.com/caiotleal/electrimil/main/assets/logo_oficial.png" 
                      data-filename="logo_oficial.png" 
                      class="hidden h-12 w-auto object-contain edit-img" 
-                     alt="Logo Imagem">
+                     alt="Logo"
+                     onerror="this.src='https://via.placeholder.com/150x50?text=ELECTRI1000'">
             </div>
 
             <div class="hidden md:flex space-x-8 items-center text-xs uppercase tracking-widest font-bold">
@@ -177,31 +180,26 @@
     <script>
         AOS.init();
 
-        // --- CONFIGURAÇÃO (PREENCHA AQUI) ---
+        // ==========================================
+        // DADOS CONFIGURADOS AUTOMATICAMENTE
+        // ==========================================
         const GITHUB_USERNAME = "caiotleal"; 
         const GITHUB_REPO = "electrimil";    
         const GITHUB_FILE_PATH = "index.html";
-        // ------------------------------------
+        // ==========================================
 
         let activeElement = null;
         let ghToken = localStorage.getItem('gh_token');
 
         function startAdmin() {
-            if(prompt("Senha:") === "admin123") toggleEditMode(true);
+            if(prompt("Senha Admin:") === "admin123") toggleEditMode(true);
         }
 
-        // --- CONTROLE DE LOGO (TEXTO vs IMAGEM) ---
         function setLogoMode(mode) {
             const txt = document.getElementById('logo-text');
             const img = document.getElementById('logo-img');
-            
-            if (mode === 'text') {
-                txt.classList.remove('hidden');
-                img.classList.add('hidden');
-            } else {
-                txt.classList.add('hidden');
-                img.classList.remove('hidden');
-            }
+            if (mode === 'text') { txt.classList.remove('hidden'); img.classList.add('hidden'); }
+            else { txt.classList.add('hidden'); img.classList.remove('hidden'); }
         }
 
         function toggleEditMode(active) {
@@ -212,14 +210,12 @@
                 panel.style.display = 'block';
                 document.body.classList.add('border-4', 'border-blue-600');
                 
-                // Ativar Textos
                 document.querySelectorAll('.edit-text').forEach(el => {
                     el.contentEditable = "true";
                     el.classList.add('editable-active');
                     el.onclick = (e) => { e.stopPropagation(); openTextToolbar(el); };
                 });
 
-                // Ativar Imagens (Lê o data-filename)
                 document.querySelectorAll('.edit-img').forEach(el => {
                     el.classList.add('editable-img-active');
                     el.onclick = (e) => { e.stopPropagation(); openImgModal(el); };
@@ -238,109 +234,70 @@
             }
         }
 
-        // --- EDITORES ---
-        function openTextToolbar(el) {
-            activeElement = el;
-            document.getElementById('textToolbar').style.display = 'flex';
-        }
-        function applyTextStyle(prop, val) {
-            if(activeElement) activeElement.style[prop] = val;
-        }
+        function openTextToolbar(el) { activeElement = el; document.getElementById('textToolbar').style.display = 'flex'; }
+        function applyTextStyle(prop, val) { if(activeElement) activeElement.style[prop] = val; }
 
         function openImgModal(el) {
             activeElement = el;
-            const filename = el.getAttribute('data-filename') || 'sem_nome_definido.png';
-            document.getElementById('targetFileName').innerText = "Será salvo como: assets/" + filename;
+            const filename = el.getAttribute('data-filename') || 'sem_nome.png';
+            document.getElementById('targetFileName').innerText = "Substituir: assets/" + filename;
             document.getElementById('imgModal').style.display = 'flex';
         }
-        function closeImgModal() {
-            document.getElementById('imgModal').style.display = 'none';
+        function closeImgModal() { document.getElementById('imgModal').style.display = 'none'; }
+
+        // --- SISTEMA DE DOWNLOAD MANUAL (Backup) ---
+        function downloadManual() {
+            toggleEditMode(false); // Limpa visual
+            const html = document.documentElement.outerHTML;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            toggleEditMode(true); // Volta edição
+            alert("Arquivo baixado! Agora suba ele manualmente no GitHub.");
         }
 
-        // --- LÓGICA DE UPLOAD COM SUBSTITUIÇÃO ---
-        async function processImageChange() {
-            const fileInput = document.getElementById('fileInput');
-            const urlInput = document.getElementById('urlInput');
-            const btn = document.querySelector('#imgModal button');
-
-            if (urlInput.value) {
-                activeElement.src = urlInput.value;
-                closeImgModal(); return;
-            }
-
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                // PEGA O NOME FIXO DEFINIDO NO HTML
-                const fixedName = activeElement.getAttribute('data-filename');
-                
-                if (!fixedName) {
-                    alert("Erro: Esta imagem não tem um nome fixo definido no código (data-filename).");
-                    return;
-                }
-
-                btn.textContent = "Verificando e Substituindo...";
-                btn.disabled = true;
-
-                try {
-                    const base64 = await toBase64(file);
-                    const cleanBase64 = base64.split(',')[1];
-                    const path = `assets/${fixedName}`; // Pasta Assets
-
-                    // 1. TENTA OBTER O SHA DO ARQUIVO EXISTENTE (PARA SUBSTITUIR)
-                    const existingSha = await getFileSha(path);
-                    
-                    // 2. FAZ O UPLOAD (CRIA OU ATUALIZA)
-                    const uploadedUrl = await uploadFileToGitHub(path, cleanBase64, existingSha);
-                    
-                    // 3. ATUALIZA O SRC COM TIMESTAMP PARA EVITAR CACHE DO NAVEGADOR
-                    activeElement.src = uploadedUrl + "?t=" + new Date().getTime();
-                    alert("Imagem substituída com sucesso!");
-                    closeImgModal();
-
-                } catch (e) {
-                    alert("Erro: " + e.message);
-                } finally {
-                    btn.textContent = "Atualizar";
-                    btn.disabled = false;
-                }
-            }
-        }
-
-        // --- GITHUB API HELPERS ---
+        // --- INTEGRAÇÃO GITHUB ---
         async function getToken() {
             if (!ghToken) {
-                ghToken = prompt("Token GitHub:");
+                ghToken = prompt("Cole seu Token do GitHub (ghp_...):");
                 if(ghToken) localStorage.setItem('gh_token', ghToken);
             }
             return ghToken;
         }
 
-        const toBase64 = file => new Promise((resolve, reject) => {
+        const toBase64 = file => new Promise((res, rej) => {
             const r = new FileReader(); r.readAsDataURL(file);
-            r.onload = () => resolve(r.result); r.onerror = reject;
+            r.onload = () => res(r.result); r.onerror = rej;
         });
 
-        // Verifica se arquivo existe e retorna o SHA
         async function getFileSha(path) {
-            const token = await getToken();
-            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`;
-            const res = await fetch(url, { headers: { "Authorization": `token ${token}` }});
-            if (res.ok) {
+            try {
+                const token = await getToken();
+                // Adiciona timestamp para evitar cache do navegador ao buscar o SHA
+                const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}?t=${Date.now()}`;
+                const res = await fetch(url, { headers: { "Authorization": `token ${token}` }});
+                
+                if (res.status === 404) return null;
+                if (!res.ok) throw new Error(`Erro buscando SHA: ${res.status}`);
+                
                 const data = await res.json();
-                return data.sha; // Retorna o ID do arquivo para permitir sobrescrever
+                return data.sha;
+            } catch (e) {
+                throw e;
             }
-            return null; // Arquivo não existe ainda
         }
 
         async function uploadFileToGitHub(path, content, sha) {
             const token = await getToken();
             const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`;
             
-            const body = {
-                message: "Update Image (CMS)",
-                content: content
-            };
-            if (sha) body.sha = sha; // IMPORTANTE: Isso autoriza a substituição
+            const body = { message: "Update CMS (Via Site)", content: content };
+            if (sha) body.sha = sha;
 
             const res = await fetch(url, {
                 method: "PUT",
@@ -348,28 +305,73 @@
                 body: JSON.stringify(body)
             });
 
-            if (!res.ok) throw new Error("Falha ao enviar.");
-            const data = await res.json();
-            return data.content.download_url;
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(`Erro GitHub: ${res.status} - ${errData.message}`);
+            }
+            return await res.json();
+        }
+
+        async function processImageChange() {
+            const fileInput = document.getElementById('fileInput');
+            const urlInput = document.getElementById('urlInput');
+            const btn = document.querySelector('#imgModal button');
+
+            if (urlInput.value) { activeElement.src = urlInput.value; closeImgModal(); return; }
+
+            if (fileInput.files.length > 0) {
+                const fixedName = activeElement.getAttribute('data-filename');
+                if (!fixedName) return alert("Erro: Imagem sem data-filename.");
+
+                btn.textContent = "Enviando..."; btn.disabled = true;
+
+                try {
+                    const base64 = await toBase64(fileInput.files[0]);
+                    const cleanBase64 = base64.split(',')[1];
+                    const path = `assets/${fixedName}`;
+                    
+                    const sha = await getFileSha(path);
+                    const data = await uploadFileToGitHub(path, cleanBase64, sha);
+                    
+                    // Atualiza o link direto do raw para garantir visualização imediata
+                    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${path}`;
+                    activeElement.src = rawUrl + "?t=" + Date.now();
+                    
+                    alert("Imagem atualizada!");
+                    closeImgModal();
+                } catch (e) {
+                    showError(e.message);
+                } finally {
+                    btn.textContent = "Salvar"; btn.disabled = false;
+                }
+            }
         }
 
         async function saveSiteToGitHub() {
             const btn = document.getElementById('btnSave');
-            btn.innerHTML = "Salvando..."; toggleEditMode(false);
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENVIANDO...';
+            toggleEditMode(false);
             
             try {
-                const token = await getToken();
                 const html = document.documentElement.outerHTML;
                 const content = btoa(unescape(encodeURIComponent(html)));
-                const sha = await getFileSha(GITHUB_FILE_PATH); // Pega SHA do index.html
-
+                const sha = await getFileSha(GITHUB_FILE_PATH);
+                
                 await uploadFileToGitHub(GITHUB_FILE_PATH, content, sha);
-                alert("Site Salvo!");
+                alert("SUCESSO! Site atualizado no GitHub.");
             } catch (e) {
-                alert("Erro: " + e.message); toggleEditMode(true);
+                toggleEditMode(true);
+                showError("FALHA AO SALVAR:\n" + e.message);
             } finally {
-                btn.innerHTML = "SALVAR TUDO";
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> SALVAR NO GITHUB';
             }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorLog');
+            el.innerText = msg;
+            el.classList.remove('hidden');
+            alert(msg);
         }
     </script>
 </body>
