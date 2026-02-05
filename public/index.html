@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
     <title>ELECTRI1000 | Manutenção Inteligente</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,11 +17,11 @@
         body { background-color: #0a0a0c; color: #ffffff; scroll-behavior: smooth; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Modos de Edição */
+        /* Estilos do CMS */
         .editable-active { outline: 2px dashed #3b82f6; outline-offset: 4px; cursor: text; }
         .editable-img-active { outline: 2px dashed #facc15; cursor: pointer; opacity: 0.8; position: relative; }
         .editable-img-active::after {
-            content: "EDITAR"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            content: "CLIQUE P/ TROCAR"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.8); color: white; padding: 5px 10px; font-size: 10px; border-radius: 4px; pointer-events: none;
         }
 
@@ -71,7 +75,7 @@
         </button>
 
         <button onclick="downloadManual()" class="bg-blue-600/20 text-blue-400 border border-blue-500/50 px-4 py-2 rounded-lg hover:bg-blue-600/30 w-full mb-2 text-xs transition">
-            <i class="fas fa-download"></i> Baixar HTML (Manual)
+            <i class="fas fa-download"></i> Baixar HTML
         </button>
 
         <button onclick="toggleEditMode(false)" class="bg-red-900/30 text-red-500 border border-red-900/50 px-4 py-2 rounded-lg hover:bg-red-900/50 w-full text-xs transition">
@@ -119,11 +123,11 @@
                 <div id="logo-text" class="text-2xl font-black tracking-tighter italic edit-text">
                     ELECTRI<span class="text-blue-500">1000</span>
                 </div>
-                <img id="logo-img" src="https://raw.githubusercontent.com/caiotleal/electrimil/main/assets/logo_oficial.png" 
+                <img id="logo-img" 
+                     src="https://raw.githubusercontent.com/caiotleal/electrimil/main/assets/logo_oficial.png" 
                      data-filename="logo_oficial.png" 
                      class="hidden h-12 w-auto object-contain edit-img" 
-                     alt="Logo"
-                     onerror="this.src='https://via.placeholder.com/150x50?text=ELECTRI1000'">
+                     alt="Logo">
             </div>
 
             <div class="hidden md:flex space-x-8 items-center text-xs uppercase tracking-widest font-bold">
@@ -180,13 +184,9 @@
     <script>
         AOS.init();
 
-        // ==========================================
-        // DADOS CONFIGURADOS AUTOMATICAMENTE
-        // ==========================================
         const GITHUB_USERNAME = "caiotleal"; 
         const GITHUB_REPO = "electrimil";    
         const GITHUB_FILE_PATH = "index.html";
-        // ==========================================
 
         let activeElement = null;
         let ghToken = localStorage.getItem('gh_token');
@@ -245,9 +245,8 @@
         }
         function closeImgModal() { document.getElementById('imgModal').style.display = 'none'; }
 
-        // --- SISTEMA DE DOWNLOAD MANUAL (Backup) ---
         function downloadManual() {
-            toggleEditMode(false); // Limpa visual
+            toggleEditMode(false);
             const html = document.documentElement.outerHTML;
             const blob = new Blob([html], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
@@ -257,11 +256,10 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            toggleEditMode(true); // Volta edição
-            alert("Arquivo baixado! Agora suba ele manualmente no GitHub.");
+            toggleEditMode(true);
+            alert("Arquivo baixado!");
         }
 
-        // --- INTEGRAÇÃO GITHUB ---
         async function getToken() {
             if (!ghToken) {
                 ghToken = prompt("Cole seu Token do GitHub (ghp_...):");
@@ -278,25 +276,19 @@
         async function getFileSha(path) {
             try {
                 const token = await getToken();
-                // Adiciona timestamp para evitar cache do navegador ao buscar o SHA
                 const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}?t=${Date.now()}`;
                 const res = await fetch(url, { headers: { "Authorization": `token ${token}` }});
-                
                 if (res.status === 404) return null;
                 if (!res.ok) throw new Error(`Erro buscando SHA: ${res.status}`);
-                
                 const data = await res.json();
                 return data.sha;
-            } catch (e) {
-                throw e;
-            }
+            } catch (e) { throw e; }
         }
 
         async function uploadFileToGitHub(path, content, sha) {
             const token = await getToken();
             const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`;
-            
-            const body = { message: "Update CMS (Via Site)", content: content };
+            const body = { message: "Update CMS", content: content };
             if (sha) body.sha = sha;
 
             const res = await fetch(url, {
@@ -304,7 +296,6 @@
                 headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
                 body: JSON.stringify(body)
             });
-
             if (!res.ok) {
                 const errData = await res.json();
                 throw new Error(`Erro GitHub: ${res.status} - ${errData.message}`);
@@ -317,7 +308,10 @@
             const urlInput = document.getElementById('urlInput');
             const btn = document.querySelector('#imgModal button');
 
-            if (urlInput.value) { activeElement.src = urlInput.value; closeImgModal(); return; }
+            if (urlInput.value) { 
+                activeElement.setAttribute('src', urlInput.value); 
+                closeImgModal(); return; 
+            }
 
             if (fileInput.files.length > 0) {
                 const fixedName = activeElement.getAttribute('data-filename');
@@ -331,13 +325,17 @@
                     const path = `assets/${fixedName}`;
                     
                     const sha = await getFileSha(path);
-                    const data = await uploadFileToGitHub(path, cleanBase64, sha);
+                    await uploadFileToGitHub(path, cleanBase64, sha);
                     
-                    // Atualiza o link direto do raw para garantir visualização imediata
+                    // --- CORREÇÃO PRINCIPAL: setAttribute ---
                     const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${path}`;
-                    activeElement.src = rawUrl + "?t=" + Date.now();
+                    const newSrc = rawUrl + "?v=" + Date.now();
                     
-                    alert("Imagem atualizada!");
+                    // Isso escreve o novo link DIRETAMENTE NO CÓDIGO HTML
+                    activeElement.setAttribute('src', newSrc);
+                    activeElement.src = newSrc; // Atualiza visualmente também
+                    
+                    alert("Imagem atualizada! Clique em 'SALVAR NO GITHUB' para gravar a mudança.");
                     closeImgModal();
                 } catch (e) {
                     showError(e.message);
@@ -349,16 +347,17 @@
 
         async function saveSiteToGitHub() {
             const btn = document.getElementById('btnSave');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENVIANDO...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SALVANDO...';
             toggleEditMode(false);
             
             try {
+                // Captura o HTML com as alterações feitas pelo setAttribute
                 const html = document.documentElement.outerHTML;
                 const content = btoa(unescape(encodeURIComponent(html)));
                 const sha = await getFileSha(GITHUB_FILE_PATH);
                 
                 await uploadFileToGitHub(GITHUB_FILE_PATH, content, sha);
-                alert("SUCESSO! Site atualizado no GitHub.");
+                alert("SUCESSO! Site atualizado. \nAguarde 2 minutos para ver no ar.");
             } catch (e) {
                 toggleEditMode(true);
                 showError("FALHA AO SALVAR:\n" + e.message);
@@ -369,9 +368,7 @@
 
         function showError(msg) {
             const el = document.getElementById('errorLog');
-            el.innerText = msg;
-            el.classList.remove('hidden');
-            alert(msg);
+            el.innerText = msg; el.classList.remove('hidden'); alert(msg);
         }
     </script>
 </body>
