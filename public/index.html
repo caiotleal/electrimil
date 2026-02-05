@@ -6,22 +6,36 @@
     <title>ELECTRI1000 | Manutenção Inteligente</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <style>
         body { background-color: #0a0a0c; color: #ffffff; scroll-behavior: smooth; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Modo Edição */
-        .editable-active { border: 2px dashed #3b82f6; cursor: text; padding: 2px; border-radius: 4px; background: rgba(59, 130, 246, 0.1); }
-        .editable-active:focus { outline: none; border-color: #facc15; background: rgba(250, 204, 21, 0.1); }
+        /* --- ESTILOS DO MODO EDIÇÃO --- */
+        .editable-active { outline: 2px dashed #3b82f6; outline-offset: 4px; cursor: text; }
+        .editable-img-active { outline: 2px dashed #facc15; cursor: pointer; opacity: 0.8; }
         
-        /* Painel Admin */
+        /* Barra de Ferramentas de Texto (Flutuante) */
+        #textToolbar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #111; border: 1px solid #333; padding: 10px 20px; border-radius: 50px;
+            display: none; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 10000;
+        }
+
+        /* Modal de Upload de Imagem */
+        #imgModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 10001; display: none;
+            justify-content: center; align-items: center;
+        }
+
+        /* Painel Admin Principal */
         #adminPanel {
-            position: fixed; bottom: 20px; left: 20px; z-index: 9999;
-            background: #111; border: 1px solid #333; padding: 20px; border-radius: 12px;
-            display: none; box-shadow: 0 0 30px rgba(0,0,0,0.9); width: 300px;
+            position: fixed; top: 20px; left: 20px; z-index: 9999;
+            background: #0f172a; border: 1px solid #1e293b; padding: 15px; border-radius: 12px;
+            display: none; box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 280px;
         }
         
         .whatsapp-btn {
@@ -37,28 +51,75 @@
 <body class="font-sans antialiased overflow-x-hidden">
 
     <div id="adminPanel">
-        <h3 class="text-white font-bold mb-4 text-lg border-b border-gray-700 pb-2">
-            <i class="fab fa-github"></i> Painel GitHub
+        <h3 class="text-white font-bold mb-3 text-sm uppercase tracking-widest text-blue-500">
+            <i class="fas fa-cog"></i> Sistema Electri1000
         </h3>
-        
-        <div id="statusMsg" class="text-xs text-gray-400 mb-4">Pronto para editar.</div>
-
-        <button onclick="saveToGitHub()" id="btnSave" class="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 w-full mb-3 text-sm font-bold transition">
-            <i class="fas fa-cloud-upload-alt"></i> PUBLICAR NO SITE
+        <div id="statusMsg" class="text-xs text-gray-400 mb-4 bg-black p-2 rounded border border-gray-800">Pronto para editar.</div>
+        <button onclick="saveSiteToGitHub()" id="btnSave" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full mb-2 text-sm font-bold transition">
+            <i class="fas fa-save"></i> SALVAR ALTERAÇÕES
         </button>
-        
-        <button onclick="toggleEditMode(false)" class="bg-red-600/20 text-red-500 border border-red-900 px-4 py-2 rounded-lg hover:bg-red-900/50 w-full text-sm transition">
-            <i class="fas fa-times"></i> Cancelar
-        </button>
-        
-        <button onclick="clearToken()" class="text-xs text-gray-600 mt-4 underline w-full text-center hover:text-gray-400">
-            Desconectar do GitHub
+        <button onclick="toggleEditMode(false)" class="bg-red-900/30 text-red-500 border border-red-900/50 px-4 py-2 rounded-lg hover:bg-red-900/50 w-full text-sm transition">
+            Sair do Editor
         </button>
     </div>
 
-    <a href="https://wa.me/5511999999999" class="whatsapp-btn">
-        <i class="fab fa-whatsapp"></i>
-    </a>
+    <div id="textToolbar">
+        <div class="flex items-center gap-2">
+            <label class="text-gray-400 text-xs uppercase font-bold">Cor:</label>
+            <input type="color" id="colorPicker" class="bg-transparent border-none w-8 h-8 cursor-pointer" onchange="applyTextStyle('color', this.value)">
+        </div>
+        <div class="w-px h-6 bg-gray-700"></div>
+        <div class="flex items-center gap-2">
+            <label class="text-gray-400 text-xs uppercase font-bold">Tam:</label>
+            <select id="sizePicker" class="bg-gray-800 text-white text-xs p-1 rounded border border-gray-700" onchange="applyTextStyle('fontSize', this.value)">
+                <option value="1rem">Pequeno</option>
+                <option value="1.25rem">Normal</option>
+                <option value="1.5rem">Médio</option>
+                <option value="2.25rem">Grande</option>
+                <option value="3rem">Título</option>
+                <option value="4.5rem">Gigante</option>
+            </select>
+        </div>
+        <div class="w-px h-6 bg-gray-700"></div>
+        <div class="flex items-center gap-2">
+            <label class="text-gray-400 text-xs uppercase font-bold">Fonte:</label>
+            <select id="fontPicker" class="bg-gray-800 text-white text-xs p-1 rounded border border-gray-700" onchange="applyTextStyle('fontFamily', this.value)">
+                <option value="ui-sans-serif, system-ui">Padrão</option>
+                <option value="'Courier New', monospace">Técnica (Monospace)</option>
+                <option value="'Times New Roman', serif">Clássica</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="imgModal">
+        <div class="bg-zinc-900 p-8 rounded-2xl w-full max-w-md border border-gray-700">
+            <h3 class="text-xl font-bold mb-6">Alterar Imagem</h3>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-bold mb-2 text-blue-400">Opção A: Upload do Computador</label>
+                <input type="file" id="fileInput" accept="image/*" class="block w-full text-sm text-gray-400
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-600 file:text-white
+                  hover:file:bg-blue-700
+                "/>
+                <p class="text-xs text-gray-500 mt-2">Será salvo em: <span class="font-mono text-yellow-500">public/assets/</span></p>
+            </div>
+
+            <div class="text-center text-gray-600 my-4">- OU -</div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-bold mb-2 text-blue-400">Opção B: Link Externo</label>
+                <input type="text" id="urlInput" placeholder="https://..." class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white text-sm">
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="processImageChange()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Confirmar</button>
+                <button onclick="closeImgModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <nav class="fixed w-full z-50 glass">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -75,7 +136,7 @@
 
     <section class="relative h-screen flex items-center justify-center overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1581092334651-ddf26d9a1930?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-30 edit-img" alt="Background">
+            <img id="hero-bg" src="https://images.unsplash.com/photo-1581092334651-ddf26d9a1930?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-30 edit-img" alt="Background">
         </div>
         <div class="relative z-10 text-center px-4" data-aos="fade-up">
             <h1 class="text-6xl md:text-8xl font-black mb-4 italic edit-text">PRECISÃO EM <span class="text-blue-500">ENERGIA</span></h1>
@@ -106,7 +167,7 @@
 
     <footer class="py-12 border-t border-white/5 text-center text-gray-600 text-sm">
         <p id="copyright-trigger" class="cursor-pointer select-none hover:text-blue-500 transition" ondblclick="startAdmin()">
-            &copy; 2026 ELECTRI1000. Todos os direitos reservados.
+            &copy; 2026 ELECTRI1000. Todos os direitos reservados. (Duplo clique para Admin)
         </p>
     </footer>
 
@@ -115,135 +176,218 @@
         AOS.init();
 
         // ==========================================
-        // CONFIGURAÇÕES DO GITHUB (PREENCHA AQUI)
+        // CONFIGURAÇÕES DO GITHUB (EDITAR AQUI)
         // ==========================================
         const GITHUB_USERNAME = "caiotleal"; // Ex: joao-eletrica
         const GITHUB_REPO = "electrimil";    // Ex: site-electri1000
         const GITHUB_FILE_PATH = "index.html";        // O nome do arquivo no repo
         // ==========================================
+        // ==========================================
 
+        let activeElement = null; // Elemento sendo editado
+        let ghToken = localStorage.getItem('gh_token');
+
+        // --- INICIALIZAÇÃO E CONTROLE ---
         function startAdmin() {
-            const password = prompt("Senha de Administrador:");
-            if (password === "admin123") {
-                toggleEditMode(true);
-            } else {
-                alert("Senha incorreta.");
-            }
+            const pwd = prompt("Senha Admin:");
+            if (pwd === "admin123") toggleEditMode(true);
+            else alert("Senha incorreta");
         }
 
         function toggleEditMode(active) {
-            const adminPanel = document.getElementById('adminPanel');
-            const editableTexts = document.querySelectorAll('.edit-text');
-            const editableImgs = document.querySelectorAll('.edit-img');
-
+            const panel = document.getElementById('adminPanel');
+            const toolbar = document.getElementById('textToolbar');
+            
             if (active) {
-                adminPanel.style.display = 'block';
-                document.body.classList.add('border-4', 'border-yellow-500');
+                panel.style.display = 'block';
+                document.body.classList.add('border-4', 'border-blue-600');
                 
-                editableTexts.forEach(el => {
+                // Ativar Textos
+                document.querySelectorAll('.edit-text').forEach(el => {
                     el.contentEditable = "true";
                     el.classList.add('editable-active');
+                    el.onclick = (e) => {
+                        e.stopPropagation();
+                        openTextToolbar(el);
+                    };
                 });
-                
-                editableImgs.forEach(el => {
-                    el.style.cursor = "pointer";
-                    el.style.border = "2px dashed red";
-                    el.onclick = function() {
-                        const newUrl = prompt("Novo link da imagem:", el.src);
-                        if (newUrl) el.src = newUrl;
-                    }
+
+                // Ativar Imagens
+                document.querySelectorAll('.edit-img').forEach(el => {
+                    el.classList.add('editable-img-active');
+                    el.onclick = (e) => {
+                        e.stopPropagation();
+                        openImgModal(el);
+                    };
                 });
 
             } else {
-                adminPanel.style.display = 'none';
-                document.body.classList.remove('border-4', 'border-yellow-500');
+                panel.style.display = 'none';
+                toolbar.style.display = 'none';
+                document.body.classList.remove('border-4', 'border-blue-600');
                 
-                editableTexts.forEach(el => {
+                // Limpar Textos
+                document.querySelectorAll('.edit-text').forEach(el => {
                     el.contentEditable = "false";
                     el.classList.remove('editable-active');
-                });
-                editableImgs.forEach(el => {
                     el.onclick = null;
-                    el.style.border = "none";
+                });
+                // Limpar Imagens
+                document.querySelectorAll('.edit-img').forEach(el => {
+                    el.classList.remove('editable-img-active');
+                    el.onclick = null;
                 });
             }
         }
 
-        // --- LÓGICA DO GITHUB API ---
+        // --- EDITOR DE TEXTO AVANÇADO ---
+        function openTextToolbar(el) {
+            activeElement = el;
+            const toolbar = document.getElementById('textToolbar');
+            toolbar.style.display = 'flex';
+            
+            // Sincronizar valores atuais
+            const style = window.getComputedStyle(el);
+            // (Opcional) Poderia setar os inputs aqui com os valores atuais
+        }
 
-        async function saveToGitHub() {
-            // 1. Pega ou solicita o Token
-            let token = localStorage.getItem('gh_token');
-            if (!token) {
-                token = prompt("Insira seu Personal Access Token do GitHub (Começa com ghp_...):");
-                if (!token) return;
-                // Salva no navegador para não pedir de novo
-                localStorage.setItem('gh_token', token);
+        function applyTextStyle(property, value) {
+            if (activeElement) {
+                activeElement.style[property] = value;
+            }
+        }
+
+        // --- EDITOR DE IMAGENS E UPLOAD ---
+        function openImgModal(el) {
+            activeElement = el;
+            document.getElementById('imgModal').style.display = 'flex';
+        }
+
+        function closeImgModal() {
+            document.getElementById('imgModal').style.display = 'none';
+            document.getElementById('fileInput').value = "";
+            document.getElementById('urlInput').value = "";
+        }
+
+        async function processImageChange() {
+            const fileInput = document.getElementById('fileInput');
+            const urlInput = document.getElementById('urlInput');
+            const btn = document.querySelector('#imgModal button');
+
+            // 1. Se for URL direto
+            if (urlInput.value) {
+                activeElement.src = urlInput.value;
+                closeImgModal();
+                return;
             }
 
-            const btn = document.getElementById('btnSave');
-            const status = document.getElementById('statusMsg');
-            
-            // Estado de Carregamento
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-            btn.disabled = true;
-            toggleEditMode(false); // Limpa as bordas de edição antes de salvar
+            // 2. Se for Upload de Arquivo
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                btn.textContent = "Enviando para o GitHub...";
+                btn.disabled = true;
 
+                try {
+                    // Converter para Base64
+                    const base64 = await toBase64(file);
+                    const cleanBase64 = base64.split(',')[1];
+                    const fileName = Date.now() + "_" + file.name; // Nome único
+                    const path = `public/assets/${fileName}`;
+
+                    // Enviar para GitHub
+                    const uploadedUrl = await uploadFileToGitHub(path, cleanBase64);
+                    
+                    if (uploadedUrl) {
+                        activeElement.src = uploadedUrl;
+                        alert("Imagem carregada com sucesso!");
+                        closeImgModal();
+                    }
+                } catch (e) {
+                    alert("Erro no upload: " + e.message);
+                } finally {
+                    btn.textContent = "Confirmar";
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        // --- API GITHUB (UPLOAD DE ARQUIVO E SITE) ---
+        
+        async function getToken() {
+            if (!ghToken) {
+                ghToken = prompt("Token do GitHub (ghp_...):");
+                if (ghToken) localStorage.setItem('gh_token', ghToken);
+            }
+            return ghToken;
+        }
+
+        // Função Auxiliar: File -> Base64
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        // 1. Upload de Arquivo Único (Imagem)
+        async function uploadFileToGitHub(path, contentBase64) {
+            const token = await getToken();
+            if (!token) return null;
+
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`;
+            
+            const response = await fetch(url, {
+                method: "PUT",
+                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message: "Upload de imagem via CMS",
+                    content: contentBase64
+                })
+            });
+
+            if (!response.ok) throw new Error("Falha no upload GitHub");
+            const data = await response.json();
+            return data.content.download_url; // Retorna URL direta da imagem
+        }
+
+        // 2. Salvar Site Completo (HTML Atualizado)
+        async function saveSiteToGitHub() {
+            const btn = document.getElementById('btnSave');
+            btn.innerHTML = "Salvando...";
+            
+            // Limpar UI antes de salvar
+            toggleEditMode(false);
+            
             try {
-                // 2. Prepara o conteúdo HTML
+                const token = await getToken();
                 const htmlContent = document.documentElement.outerHTML;
-                
-                // Codifica para Base64 (com suporte a acentos/UTF-8)
                 const contentBase64 = btoa(unescape(encodeURIComponent(htmlContent)));
 
-                // 3. Busca o SHA atual do arquivo (necessário para atualizar)
-                const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+                // Pegar SHA atual
+                const getUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+                const getRes = await fetch(getUrl, { headers: { "Authorization": `token ${token}` }});
+                const getData = await getRes.json();
                 
-                const getResponse = await fetch(apiUrl, {
-                    headers: { 
-                        "Authorization": `token ${token}`,
-                        "Accept": "application/vnd.github.v3+json"
-                    }
-                });
-
-                if (!getResponse.ok) throw new Error("Erro ao conectar no GitHub. Verifique Usuário/Repo ou Token.");
-                const fileData = await getResponse.json();
-                const sha = fileData.sha;
-
-                // 4. Envia a atualização (PUT)
-                const putResponse = await fetch(apiUrl, {
+                // Enviar Update
+                const putRes = await fetch(getUrl, {
                     method: "PUT",
-                    headers: {
-                        "Authorization": `token ${token}`,
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        message: "Atualização via Site Admin ⚡", // Mensagem do Commit
+                        message: "Site atualizado via CMS ⚡",
                         content: contentBase64,
-                        sha: sha
+                        sha: getData.sha
                     })
                 });
 
-                if (putResponse.ok) {
-                    alert("SUCESSO! Site atualizado em tempo real.");
-                    status.innerHTML = '<span class="text-green-500">Atualizado com sucesso!</span>';
-                } else {
-                    throw new Error("Falha ao salvar. Verifique permissões.");
-                }
+                if (putRes.ok) alert("SITE SALVO COM SUCESSO! 🚀");
+                else throw new Error("Erro ao salvar HTML");
 
-            } catch (error) {
-                alert("ERRO: " + error.message);
-                status.innerHTML = '<span class="text-red-500">Erro na conexão.</span>';
-                localStorage.removeItem('gh_token'); // Limpa token se der erro
+            } catch (e) {
+                alert("Erro: " + e.message);
+                toggleEditMode(true); // Voltar se der erro
             } finally {
-                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> PUBLICAR NO SITE';
-                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> SALVAR ALTERAÇÕES';
             }
-        }
-
-        function clearToken() {
-            localStorage.removeItem('gh_token');
-            alert("Desconectado. Será necessário inserir o Token novamente na próxima edição.");
         }
     </script>
 </body>
